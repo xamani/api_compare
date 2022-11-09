@@ -1,0 +1,38 @@
+version: "3.7"
+services:
+  app:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: api_compare-alpine
+    container_name: api_compare-app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    tty: true
+    ports:
+      - '${APP_PORT:-8009}:80'
+    depends_on:
+      - mariadb
+    volumes:
+      - ./:/var/www/html
+
+  mariadb:
+    image: mariadb:10.5.9
+    container_name: api_compare-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_PASSWORD=123456
+      - MYSQL_DATABASE=sample_db
+      - MYSQL_USER=sample_db_user
+    volumes:
+      - api_compare_db_data:/var/lib/mysql
+      - ./docker/development/mysqlconf:/etc/mysql/conf.d
+    ports:
+      - "3309:3306"
+
+networks:
+  api_compare_api:
+    driver: bridge
+
+volumes:
+  api_compare_db_data:
